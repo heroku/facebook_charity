@@ -1,0 +1,13 @@
+charities:
+  - name:     Bikes Belong
+    id:       1
+    logo_url: images/logos/bikes_belong.gif
+    url:      http://www.bikesbelong.org/bikes-belong-foundation/people-for-bikes
+  - name:     First Friday
+    id:       2
+    logo_url: images/logos/first_friday.png
+    url:      http://www.firstfridaylasvegas.com/faq.htm
+  - name:     Neon Museum
+    id:       3
+    logo_url: images/logos/neon_museum.png
+    url:      http://www.neonmuseum.org/

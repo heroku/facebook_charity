@@ -1,9 +1,31 @@
 require "sinatra"
 require 'koala'
+require 'securerandom'
+
+$stdout.sync = true ## for foreman output
 
 enable :sessions
 set :raise_errors, false
 set :show_exceptions, false
+
+
+## Datamapper is an ORM that we can use to store vote data
+require 'data_mapper'
+
+DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/my_database')
+
+
+class Vote
+  include DataMapper::Resource
+  property :id,         Serial
+  property :user_id,    String, :unique => true # Only one vote per user!
+  property :charity_id, Integer
+  timestamps :at
+end
+
+DataMapper.auto_upgrade!
+
+
 
 # Scope defines what permissions that we are asking the user to grant.
 # In this example, we are asking for the ability to publish stories
@@ -46,6 +68,19 @@ helpers do
     @authenticator ||= Koala::Facebook::OAuth.new(ENV["FACEBOOK_APP_ID"], ENV["FACEBOOK_SECRET"], url("/auth/facebook/callback"))
   end
 
+  def charities
+    @charities     ||= begin
+      charities = YAML.load(File.read("./charities.yml"))['charities']
+      charities.each do |charity|
+        charity["vote_count"] = Vote.all(:charity_id => charity["id"]).count
+      end
+    end
+  end
+
+  def visitor_id
+    session[:visitor_id] ||= SecureRandom.hex + Time.now.to_i.to_s
+  end
+
 end
 
 # the facebook session expired! reset ours and restart the process
@@ -61,6 +96,8 @@ get "/" do
   # Get public details of current application
   @app  =  @graph.get_object(ENV["FACEBOOK_APP_ID"])
 
+  @vote_count = Vote.count
+
   if session[:access_token]
     @user    = @graph.get_object("me")
     @friends = @graph.get_connections('me', 'friends')
@@ -71,6 +108,20 @@ get "/" do
     @friends_using_app = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid in (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1")
   end
   erb :index
+end
+
+post '/vote' do
+  begin
+    vote = Vote.create(
+      :user_id => params[:visitor_id],
+      :charity_id => charity(params[:charity_id].to_i)['id']
+    )
+    success = vote.save
+  rescue DataObjects::IntegrityError => e
+    success = false
+  end
+
+  redirect "/"
 end
 
 # used by Canvas apps - redirect the POST to be a regular GET
