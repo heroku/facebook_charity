@@ -1,4 +1,4 @@
-Facebook/Heroku sample app -- Ruby
+Facebook Charity Demo App
 ==================================
 
 This is a sample app showing use of the Facebook Graph API, written in Ruby, designed for deployment to [Heroku](http://www.heroku.com/).
@@ -6,9 +6,11 @@ This is a sample app showing use of the Facebook Graph API, written in Ruby, des
 Run locally
 -----------
 
+You will need [postgres](http://postgresapp.com/), [ruby 1.9](http://www.ruby-lang.org/en/downloads/) and [bundler](http://gembundler.com/) installed.
+
 Install dependencies:
 
-    bundle install
+    $ bundle install
 
 [Create an app on Facebook](https://developers.facebook.com/apps) and set the Website URL to `http://localhost:5000/`.
 
@@ -19,7 +21,18 @@ Copy the App ID and Secret from the Facebook app settings page into your `.env`:
 
 Launch the app with [Foreman](http://blog.daviddollar.org/2011/05/06/introducing-foreman.html):
 
-    foreman start
+    $ foreman start
+
+
+To debug in the console you can run
+
+    $ foreman run irb -r ./app.rb
+
+You can delete votes from the console using datamapper:
+
+    $ foreman run irb -r ./app.rb
+    > Vote.last.destroy
+
 
 Deploy to Heroku via Facebook integration
 -----------------------------------------

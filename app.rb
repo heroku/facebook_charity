@@ -1,6 +1,8 @@
 require "sinatra"
 require 'koala'
 require 'securerandom'
+require 'ostruct'
+
 
 $stdout.sync = true ## for foreman output
 
@@ -89,6 +91,10 @@ error(Koala::Facebook::APIError) do
   redirect "/auth/facebook"
 end
 
+def current_user
+  @current_user ||= OpenStruct.new(:visitor_id => visitor_id, :vote => Vote.first(:user_id => visitor_id))
+end
+
 get "/" do
   # Get base API Connection
   @graph  = Koala::Facebook::API.new(session[:access_token])
@@ -110,11 +116,11 @@ get "/" do
   erb :index
 end
 
-post '/vote' do
+get '/vote' do
   begin
     vote = Vote.create(
-      :user_id => params[:visitor_id],
-      :charity_id => charity(params[:charity_id].to_i)['id']
+      :user_id    => visitor_id,
+      :charity_id => params[:charity_id].to_i
     )
     success = vote.save
   rescue DataObjects::IntegrityError => e

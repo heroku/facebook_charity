@@ -49,11 +49,27 @@
                 <%= charity['vote_count'].to_s %>
                 <small><%= charity['vote_count'] == 1 ? ' vote' : ' votes' %></small>
               </p>
-              <a href="#" class="facebook-button vote-button<%= ' enabled' %>">
-                <span class="vote-button">
-                  Vote
-                </span>
-              </a>
+              <% if current_user.vote.nil?  %>
+                <a href="/vote?charity_id=<%= charity['id'] %>" class="facebook-button vote-button enabled">
+                  <span class="vote-button">
+                    Vote
+                  </span>
+                </a>
+              <% else %>
+                <% if current_user.vote.charity_id == charity['id'] %>
+                  <a href="/" class="facebook-button voted-button">
+                    <span class="vote-button">
+                      Voted
+                    </span>
+                  </a>
+                <% else %>
+                  <a href="/" class="facebook-button vote-button">
+                      <span class="vote-button">
+                        Vote
+                      </span>
+                    </a>
+                <% end %>
+              <% end %>
             </nav>
           </li>
         <% end %>
