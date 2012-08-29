@@ -1,1 +1,1 @@
-web: bundle exec shotgun --server=thin --port=$PORT --env ${RACK_ENV:-development}
+web: bundle exec shotgun --server=thin --port=$PORT
