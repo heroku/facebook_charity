@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$RACK_ENV" == "production" ]; then
+  exec bundle exec thin start -p $PORT -e $RACK_ENV
+else
+  exec bundle exec shotgun -p $PORT --server=thin
+fi
